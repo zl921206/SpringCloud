@@ -1,0 +1,56 @@
+# 服务端口
+server:
+  port: 8083
+
+# 服务应用名称
+spring:
+  application:
+    name: gateway-server
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          # 当新加了服务时，不用去配置路由规则和重启网关gateway也能转发
+          #是否与服务注册于发现组件进行结合，通过 serviceId 转发到具体的服务实例。
+          # 默认为 false，设为 true 便开启通过服务中心的自动根据 serviceId 创建路由的功能。
+          enabled: false
+          # 开启小写验证，默认feign根据服务名查找都是用的全大写
+          lower-case-service-id: true
+      # 设置spring.cloud.gateway.routes,需将spring.cloud.gateway.discovery.locator.enabled改为false
+      # 如果不改的话，localhost:8080/provider-server/controller/index请求服务地址也能正常访问，
+      # 因为这时为每个服务创建了2个router。
+      routes:
+        # provider服务  http://gateway-server:8083/provider/test
+        # 路由id:自定义。
+        - id: provider-server
+          # 路由uri：从eureka获取服务，且以lb(load-balance)负载均衡方式转发
+          uri: http://provider-server:8081
+#          uri: lb://provider-server
+          predicates:
+            # 路由断言:Path的predicates,将以/provider/**开头的请求都会转发到uri为lb://provider-server的地址上
+            - Path=/provider/**
+          filters:
+            # 路由filters：用StripPrefix的filter 在转发之前将/provider去掉
+            - StripPrefix=1
+
+        # customer服务  http://gateway-server:8083/customer/index
+        # 路由id:自定义。
+        - id: customer-server
+          # 路由uri：从eureka获取服务，且以lb(load-balance)负载均衡方式转发
+          uri: http://customer-server:8082
+#          uri: lb://customer-server
+          predicates:
+            # 路由断言:Path的predicates,将以/provider/**开头的请求都会转发到uri为lb://provider-server的地址上
+            - Path=/customer/**
+          filters:
+            # 路由filters：用StripPrefix的filter 在转发之前将/provider去掉
+            - StripPrefix=1
+
+eureka:
+  client:
+    # 注册中心地址
+    service-url:
+      defaultZone: http://127.0.0.1:8080/eureka
+  instance:
+    # true将IP注册到Eureka,false将机器的主机名注册到Eureka
+    prefer-ip-address: true
