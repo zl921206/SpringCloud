@@ -24,7 +24,7 @@ public class FeignController {
     @GetMapping("getFeignProviderInfo")
     public String getFeignProviderInfo() {
         String result = feignService.getFeignCustomerInfo();
-        log.info("result={}", result);
+        log.info("result：{}", result);
         return result;
     }
 }

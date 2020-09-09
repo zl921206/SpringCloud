@@ -16,7 +16,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
  */
 @EnableEurekaClient
 /**
- * 增加Feign支持
+ * 增加Feign支持,进行远程调用
  */
 @EnableFeignClients
 public class SpringBootProvider {
